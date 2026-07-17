@@ -1,11 +1,10 @@
 //libs
-
 #include <SoftwareSerial.h>
 #include <wire.h>
 #include
 #include
 
-//defs to change the names if needed
+//defs 
 #define threeaxisSDA A4 //SDA
 #define threeaxisSCL A5 //SCL
 #define SD_MISO 12
@@ -20,17 +19,22 @@
 #define Soft serial Rx (NEO-6M) 4
 #define Soft serial Tx (ESP01) 3
 #define Soft serial Rx (ESP01) 2
+SoftwareSerial GPS_Serial(GPS_RX, GPS_TX);
+
 
 void setup() {
-  // put your setup code here, to run once:
+  // pinModes 
   pinMode(8,OUTPUT);
   pinMode(9,OUTPUT);
   pinMode(7,INPUT);
   pinMode(6,INPUT);
+  //Serial monitor
+  Serial.begin(9600);
+  GPS_Serial.begin(9600);
 }
 
 void loop() {
-  int alarm=0;//to turn 
+  int alarm=0;//to change
 //ALARM MODE
 while(x==1)
 {digitalWrite(LED,HIGH);
@@ -41,16 +45,8 @@ digitalWrite(LED,LOW);
 delay(500);
 }
 }
-//to look at files and check for sample code for the various sensors. under downloads under the file name Arudiuno sample code for IO devices 
+//to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices 
 // GPS sample code
-SoftwareSerial GPS_Serial(4, 5); // Rx, Tx
-
-void setup()
-{
-  Serial.begin(9600);
-  GPS_Serial.begin(9600);
-}
-
 void loop()
 {
   while (GPS_Serial.available() > 0) {
