@@ -15,10 +15,10 @@
 #define LED 8
 #define DIP1 6
 #define DIP2 7
-#define Soft serial Tx (NEO-6M) 5
-#define Soft serial Rx (NEO-6M) 4
-#define Soft serial Tx (ESP01) 3
-#define Soft serial Rx (ESP01) 2
+#define GPS_TX 5
+#define GPS_RX 4
+#define Wifi_TX 3
+#define Wifi_RX 2
 SoftwareSerial GPS_Serial(GPS_RX, GPS_TX);
 
 
