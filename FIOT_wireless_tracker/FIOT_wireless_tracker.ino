@@ -35,6 +35,10 @@ char DATAY1 = 0x35; //Y-Axis Data 1
 char DATAZ0 = 0x36; //Z-Axis Data 0
 char DATAZ1 = 0x37; //Z-Axis Data 1
 
+int x,y,z;
+int xref,yref,zref;
+bool ref == false ;
+
 void setup() {
   // pinModes 
   pinMode(LED,OUTPUT);
@@ -66,9 +70,23 @@ ReadGPS();
 //3axis sensor
   readAccel(); // read the x/y/z tilt
   delay(500); // only read every 0,5 seconds
-
-//ALARM MODE
 if(mode2==HIGH)
+{
+  readAccel();
+  if(ref==false){
+    xref=x;
+    yref=y;
+    zref=z;
+    ref=true;
+  }
+}
+//ALARM MODE
+if(ref=true)
+{
+ readAccel();
+ if(abs(x-refX) > 20 ||
+       abs(y-refY) > 20 ||
+       abs(z-refZ) > 20)
   {
   digitalWrite(LED,HIGH);
   digitalWrite(Buzzer,HIGH);
@@ -88,9 +106,9 @@ void readAccel() {
 
   // each axis reading comes in 10 bit resolution, ie 2 bytes.  Least Significat Byte first!!
   // thus we are converting both bytes in to one int
-  int x = (((int)_buff[1]) << 8) | _buff[0];   
-  int y = (((int)_buff[3]) << 8) | _buff[2];
-  int z = (((int)_buff[5]) << 8) | _buff[4];
+  x = (((int)_buff[1]) << 8) | _buff[0];   
+  y = (((int)_buff[3]) << 8) | _buff[2];
+  z = (((int)_buff[5]) << 8) | _buff[4];
   Serial.print("x: ");
   Serial.print( x );
   Serial.print(" y: ");
