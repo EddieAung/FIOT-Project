@@ -35,7 +35,15 @@ char DATAY1 = 0x35; //Y-Axis Data 1
 char DATAZ0 = 0x36; //Z-Axis Data 0
 char DATAZ1 = 0x37; //Z-Axis Data 1
 
-//int ReadGPS();
+int x,y,z;
+int refX, refY, refZ; // Stored stationary values
+bool referenceSaved = false;
+
+// Function Prototype
+void readGPS();
+void readAccel();
+void writeTo(byte address, byte val);
+void readFrom(byte address, int num, byte buffer[]);
 
 void setup() {
   // pinModes 
@@ -58,32 +66,47 @@ void setup() {
 }
 
 void loop() {
-int mode,mode2;
+int mode,stationarymode;
 mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
-mode2=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
+stationarymode=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
 
 if(digitalRead(DIP1)==HIGH)
 {
-ReadGPS();
+readGPS();
 }
 
-//3axis sensor
-  readAccel(); // read the x/y/z tilt
-  delay(500); // only read every 0,5 seconds
-
-//ALARM MODE
-  if(mode2==HIGH)
-  {
-  digitalWrite(LED,HIGH);
-  digitalWrite(Buzzer,HIGH);
-  delay(500);
-  digitalWrite(LED,LOW);
-  digitalWrite(Buzzer,LOW);
-  delay(500);
+if(stationarymode==HIGH)
+{
+  readAccel();
+  if (referenceSaved==false){ 
+  refX=x;
+  refY=y;
+  refZ=z;
+  referenceSaved=true;
   }
 }
+if(stationarymode == LOW)
+{
+    referenceSaved = false;
+}
 
+//ALARM MODE
+if(referenceSaved)
+{
+    readAccel();
 
+    if(abs(x-refX) > 20 ||
+       abs(y-refY) > 20 ||
+       abs(z-refZ) > 20)
+    {
+        digitalWrite(LED,HIGH);
+        digitalWrite(Buzzer,HIGH);
+        digitalWrite(LED,LOW);
+        digitalWrite(Buzzer,HIGH);
+    }
+}
+
+}
 
 //functions 
 void readAccel() {
@@ -92,9 +115,9 @@ void readAccel() {
 
   // each axis reading comes in 10 bit resolution, ie 2 bytes.  Least Significat Byte first!!
   // thus we are converting both bytes in to one int
-  int x = (((int)_buff[1]) << 8) | _buff[0];   
-  int y = (((int)_buff[3]) << 8) | _buff[2];
-  int z = (((int)_buff[5]) << 8) | _buff[4];
+  x = (((int)_buff[1]) << 8) | _buff[0];   
+  y = (((int)_buff[3]) << 8) | _buff[2];
+  z = (((int)_buff[5]) << 8) | _buff[4];
   Serial.print("x: ");
   Serial.print( x );
   Serial.print(" y: ");
@@ -128,13 +151,13 @@ void readFrom(byte address, int num, byte _buff[]) {
   Wire.endTransmission();         // end transmission
 }
 
-void ReadGPS()
+void readGPS()
 {
   //GPS
 while (GPS_Serial.available() > 0)
     {
     Serial.write(GPS_Serial.read()); // Output the raw GPS data to the serial monitor
-    delay(50000)
+    delay(50000);
     }
 }
 
