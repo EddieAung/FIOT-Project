@@ -1,6 +1,6 @@
 //libs
 #include <SoftwareSerial.h>
-#include <wire.h>
+#include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 
@@ -20,8 +20,8 @@
 #define Wifi_TX 3
 #define Wifi_RX 2
 SoftwareSerial GPS_Serial(GPS_RX, GPS_TX);
+SoftwareSerial WiFi_Serial(Wifi_RX, Wifi_TX);
 
-<<<<<<< HEAD
 //3axis 
 #define DEVICE (0x53) // Device address as specified in data sheet 
 byte _buff[6];
@@ -35,72 +35,51 @@ char DATAY1 = 0x35; //Y-Axis Data 1
 char DATAZ0 = 0x36; //Z-Axis Data 0
 char DATAZ1 = 0x37; //Z-Axis Data 1
 
-int x,y,z;
-int refX, refY, refZ; // Stored stationary values
-bool referenceSaved = false;
-
-// Function Prototype
-void readGPS();
-void readAccel();
-void writeTo(byte address, byte val);
-void readFrom(byte address, int num, byte buffer[]);
-=======
->>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
-
 void setup() {
   // pinModes 
-  pinMode(8,OUTPUT);
-  pinMode(9,OUTPUT);
-  pinMode(7,INPUT);
-  pinMode(6,INPUT);
+  pinMode(LED,OUTPUT);
+  pinMode(Buzzer,OUTPUT);
+  pinMode(DIP2,INPUT);
+  pinMode(DIP1,INPUT);
   //Serial monitor
   Serial.begin(9600);
   GPS_Serial.begin(9600);
+  WiFi_Serial.begin(19200);
+  //3-Axis
+  Wire.begin();        // join i2c bus (address optional for master)
+  Serial.print("init");
+  //Put the ADXL345 into +/- 4G range by writing the value 0x01 to the DATA_FORMAT register.
+  writeTo(DATA_FORMAT, 0x01);
+  //Put the ADXL345 into Measurement Mode by writing 0x08 to the POWER_CTL register.
+  writeTo(POWER_CTL, 0x08);
 }
 
 void loop() {
-<<<<<<< HEAD
-int mode,stationarymode;
+int mode,mode2;
 mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
-stationarymode=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
+mode2=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
 
 if(digitalRead(DIP1)==HIGH)
 {
-readGPS();
+ReadGPS();
 }
-
-if(stationarymode==HIGH)
-{
-  readAccel();
-  if (referenceSaved==false){ 
-  refX=x;
-  refY=y;
-  refZ=z;
-  referenceSaved=true;
-  }
-}
-if(stationarymode == LOW)
-{
-    referenceSaved = false;
-}
+//3axis sensor
+  readAccel(); // read the x/y/z tilt
+  delay(500); // only read every 0,5 seconds
 
 //ALARM MODE
-if(referenceSaved)
-{
-    readAccel();
-
-    if(abs(x-refX) > 20 ||
-       abs(y-refY) > 20 ||
-       abs(z-refZ) > 20)
-    {
-        digitalWrite(LED,HIGH);
-        digitalWrite(Buzzer,HIGH);
-        digitalWrite(LED,LOW);
-        digitalWrite(Buzzer,HIGH);
-    }
+if(mode2==HIGH)
+  {
+  digitalWrite(LED,HIGH);
+  digitalWrite(Buzzer,HIGH);
+  delay(500);
+  digitalWrite(LED,LOW);
+  digitalWrite(Buzzer,LOW);
+  delay(500);
+  }
 }
 
-}
+
 
 //functions 
 void readAccel() {
@@ -109,9 +88,9 @@ void readAccel() {
 
   // each axis reading comes in 10 bit resolution, ie 2 bytes.  Least Significat Byte first!!
   // thus we are converting both bytes in to one int
-  x = (((int)_buff[1]) << 8) | _buff[0];   
-  y = (((int)_buff[3]) << 8) | _buff[2];
-  z = (((int)_buff[5]) << 8) | _buff[4];
+  int x = (((int)_buff[1]) << 8) | _buff[0];   
+  int y = (((int)_buff[3]) << 8) | _buff[2];
+  int z = (((int)_buff[5]) << 8) | _buff[4];
   Serial.print("x: ");
   Serial.print( x );
   Serial.print(" y: ");
@@ -145,35 +124,16 @@ void readFrom(byte address, int num, byte _buff[]) {
   Wire.endTransmission();         // end transmission
 }
 
-void readGPS()
-=======
-
-int alarm=0;//to change
-
-//ALARM MODE
-while(x==1)
->>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
-{
-digitalWrite(LED,HIGH);
-digitalWrite(9,HIGH);
-delay(500);
-digitalWrite(LED,LOW);
-digitalWrite(9,LOW);
-delay(500);
-}
-
 //GPS
+void ReadGPS()
+{
+  GPS_Serial.listen(); // make the GPS port the active listening one so that it will 
 while (GPS_Serial.available() > 0)
     {
     Serial.write(GPS_Serial.read()); // Output the raw GPS data to the serial monitor
-<<<<<<< HEAD
-    delay(50000);
-=======
->>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
     }
 }
+//to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices
 
-//to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices 
-
-
-
+//to take a look at thinkspeak code as well 
+//to do sd,wifi app and thinkspeak
