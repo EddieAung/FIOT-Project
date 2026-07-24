@@ -37,7 +37,7 @@ char DATAZ1 = 0x37; //Z-Axis Data 1
 
 int x,y,z;
 int xref,yref,zref;
-bool ref == false ;
+bool ref = false ;
 
 void setup() {
   // pinModes 
@@ -59,44 +59,43 @@ void setup() {
 }
 
 void loop() {
-int mode,mode2;
-mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
-mode2=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
+  int mode,mode2;
+  mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
+  mode2=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
 
-if(digitalRead(DIP1)==HIGH)
-{
-ReadGPS();
-}
-//3axis sensor
-  readAccel(); // read the x/y/z tilt
-  delay(500); // only read every 0,5 seconds
-if(mode2==HIGH)
-{
-  readAccel();
-  if(ref==false){
-    xref=x;
-    yref=y;
-    zref=z;
-    ref=true;
-  }
-}
-//ALARM MODE
-if(ref=true)
-{
- readAccel();
- if(abs(x-refX) > 20 ||
-       abs(y-refY) > 20 ||
-       abs(z-refZ) > 20)
+  if(mode==HIGH)
   {
-  digitalWrite(LED,HIGH);
-  digitalWrite(Buzzer,HIGH);
-  delay(500);
-  digitalWrite(LED,LOW);
-  digitalWrite(Buzzer,LOW);
-  delay(500);
+    ReadGPS();
   }
+  //stationary mode
+  if(mode2==HIGH)
+  {
+    readAccel();
+    if(ref==false){
+      xref=x;
+      yref=y;
+      zref=z;
+      ref=true;
+    }
+  }
+  //ALARM MODE
+  if(ref)
+  {
+    if(abs(x-xref) > 20 ||
+       abs(y-yref) > 20 ||
+       abs(z-zref) > 20)
+      {
+    digitalWrite(LED,HIGH);
+    digitalWrite(Buzzer,HIGH);
+    delay(500);
+    digitalWrite(LED,LOW);
+    digitalWrite(Buzzer,LOW);
+    delay(500);
+    }
+  }
+  if(mode2==LOW)
+  {ref=false;}
 }
-
 
 
 //functions 
