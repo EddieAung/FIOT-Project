@@ -1,6 +1,6 @@
 //libs
 #include <SoftwareSerial.h>
-#include <Wire.h>
+#include <wire.h>
 #include <SPI.h>
 #include <SD.h>
 
@@ -20,8 +20,8 @@
 #define Wifi_TX 3
 #define Wifi_RX 2
 SoftwareSerial GPS_Serial(GPS_RX, GPS_TX);
-SoftwareSerial WiFi_Serial(Wifi_RX, Wifi_TX);
 
+<<<<<<< HEAD
 //3axis 
 #define DEVICE (0x53) // Device address as specified in data sheet 
 byte _buff[6];
@@ -44,28 +44,22 @@ void readGPS();
 void readAccel();
 void writeTo(byte address, byte val);
 void readFrom(byte address, int num, byte buffer[]);
+=======
+>>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
 
 void setup() {
   // pinModes 
-  pinMode(LED,OUTPUT);
-  pinMode(Buzzer,OUTPUT);
-  pinMode(DIP2,INPUT);
-  pinMode(DIP1,INPUT);
+  pinMode(8,OUTPUT);
+  pinMode(9,OUTPUT);
+  pinMode(7,INPUT);
+  pinMode(6,INPUT);
   //Serial monitor
   Serial.begin(9600);
   GPS_Serial.begin(9600);
-  WiFi_Serial.begin(19200);
-  GPS_Serial.listen(); // make the GPS port the active listening one so that it will 
-  //3-Axis
-  Wire.begin();        // join i2c bus (address optional for master)
-  Serial.print("init");
-  //Put the ADXL345 into +/- 4G range by writing the value 0x01 to the DATA_FORMAT register.
-  writeTo(DATA_FORMAT, 0x01);
-  //Put the ADXL345 into Measurement Mode by writing 0x08 to the POWER_CTL register.
-  writeTo(POWER_CTL, 0x08);
 }
 
 void loop() {
+<<<<<<< HEAD
 int mode,stationarymode;
 mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
 stationarymode=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
@@ -152,16 +146,34 @@ void readFrom(byte address, int num, byte _buff[]) {
 }
 
 void readGPS()
+=======
+
+int alarm=0;//to change
+
+//ALARM MODE
+while(x==1)
+>>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
 {
-  //GPS
+digitalWrite(LED,HIGH);
+digitalWrite(9,HIGH);
+delay(500);
+digitalWrite(LED,LOW);
+digitalWrite(9,LOW);
+delay(500);
+}
+
+//GPS
 while (GPS_Serial.available() > 0)
     {
     Serial.write(GPS_Serial.read()); // Output the raw GPS data to the serial monitor
+<<<<<<< HEAD
     delay(50000);
+=======
+>>>>>>> parent of 2dfd322 (Update FIOT_wireless_tracker.ino)
     }
 }
 
-//to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices
+//to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices 
 
-//to take a look at thinkspeak code as well 
-//to do sd,wifi app and thinkspeak
+
+
