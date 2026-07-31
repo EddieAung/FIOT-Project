@@ -82,8 +82,8 @@ void setup() {
 
 void loop() {
   int mode,mode2;
-  mode= digitalRead(DIP1); //DIP1 is DIP switch 2 on board
-  mode2=digitalRead(DIP2);//DIP2 is DIP Switch 1 on board  
+  mode= digitalRead(DIP1); //DIP1 is switch 2 on board
+  mode2=digitalRead(DIP2);//DIP2 is Switch 1 on board  
 
   if(mode==HIGH)
   {
@@ -108,9 +108,9 @@ void loop() {
   //ALARM MODE
   if(ref)
   {
-    if(abs(x-xref) > 20 ||
-       abs(y-yref) > 20 ||
-       abs(z-zref) > 20)
+    if(abs(x-xref) > 100 ||
+       abs(y-yref) > 100 ||
+       abs(z-zref) > 100)
       {
     digitalWrite(LED,HIGH);
     digitalWrite(Buzzer,HIGH);
