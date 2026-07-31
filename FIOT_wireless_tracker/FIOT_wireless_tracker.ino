@@ -65,6 +65,19 @@ void setup() {
   writeTo(DATA_FORMAT, 0x01);
   //Put the ADXL345 into Measurement Mode by writing 0x08 to the POWER_CTL register.
   writeTo(POWER_CTL, 0x08);
+
+    // Reset ESP8266
+    sendData("AT+RST\r\n", 3000, DEBUG);
+
+    // Set WiFi mode
+    sendData("AT+CWMODE=1\r\n", 2000, DEBUG);
+
+    // Connect to WiFi
+    sendData("AT+CWJAP=\"Flippty floppity fosh\",\"patrickthestarfish\"\r\n", 30000, DEBUG);
+
+    // Single connection mode
+    sendData("AT+CIPMUX=0\r\n", 2000, DEBUG);
+
 }
 
 void loop() {
@@ -75,6 +88,11 @@ void loop() {
   if(mode==HIGH)
   {
     ReadGPS();
+
+    if (gps.location.isValid())
+    {
+   // Wifi();
+    }
   }
   //stationary mode
   if(mode2==HIGH)
@@ -163,6 +181,9 @@ void ReadGPS()
 
         if (gps.location.isUpdated())
         {
+            latitude = gps.location.lat();
+            longitude = gps.location.lng();
+
             Serial.print("Latitude: ");
             Serial.println(gps.location.lat(), 6);
 
@@ -170,6 +191,15 @@ void ReadGPS()
             Serial.println(gps.location.lng(), 6);
         }
     }
+if (gps.location.isValid())
+{
+    Serial.println("GPS FIX!");
+}
+else
+{
+    delay(5000);
+    Serial.println("I think we are lost guys GGS!");
+}
 }
 
 //Wifi module. 
@@ -177,29 +207,20 @@ void Wifi()
 {
     WiFi_Serial.listen();
 
-    // Reset ESP8266
-    sendData("AT+RST\r\n", 3000, DEBUG);
-
-    // Set WiFi mode
-    sendData("AT+CWMODE=1\r\n", 2000, DEBUG);
-
-    // Connect to WiFi
-    sendData("AT+CWJAP=\"Flippty floppity fosh\",\"patrickthestarfish\"\r\n", 10000, DEBUG);
-
-    // Single connection mode
-    sendData("AT+CIPMUX=0\r\n", 2000, DEBUG);
-
     // Connect to ThingSpeak
     sendData("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",80\r\n", 5000, DEBUG);
 
     // Create HTTP GET request
    String getStr = "GET /update?api_key=";
-  getStr += apiKey;
-  getStr += "&field1=";
-  getStr += String(latitude, 6);
-  getStr += "&field2=";
-  getStr += String(longitude, 6);
+  //getStr += apiKey;
+  //getStr += "&field1=";
+  //getStr += String(latitude, 6);
+  //getStr += "&field2=";
+  //getStr += String(longitude, 6);
   getStr += "\r\n\r\n";
+  getStr += "1.290270";      // Singapore latitude
+getStr += "&field2=";
+getStr += "103.851959";    // Singapore longitude
 
     // Tell ESP how many bytes will be sent
     WiFi_Serial.print("AT+CIPSEND=");
@@ -218,6 +239,7 @@ void Wifi()
 
     // Close TCP connection
     sendData("AT+CIPCLOSE\r\n", 2000, DEBUG);
+    GPS_Serial.listen();
 }
 
 String sendData(String command, const int timeout, boolean debug)
