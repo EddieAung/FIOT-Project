@@ -3,6 +3,9 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <TinyGPS++.h>
+
+TinyGPSPlus gps;
 
 //defs 
 #define threeaxisSDA A4 //SDA
@@ -21,6 +24,7 @@
 #define Wifi_RX 2
 SoftwareSerial GPS_Serial(GPS_RX, GPS_TX);
 SoftwareSerial WiFi_Serial(Wifi_RX, Wifi_TX);
+#define DEBUG true
 
 //3axis 
 #define DEVICE (0x53) // Device address as specified in data sheet 
@@ -34,10 +38,14 @@ char DATAY0 = 0x34; //Y-Axis Data 0
 char DATAY1 = 0x35; //Y-Axis Data 1
 char DATAZ0 = 0x36; //Z-Axis Data 0
 char DATAZ1 = 0x37; //Z-Axis Data 1
-
+float latitude,longitude;
 int x,y,z;
 int xref,yref,zref;
 bool ref = false ;
+
+
+// replace with your Thingspeak channel's API key!!!
+String apiKey = "N5XSN9TXBMCARV84";
 
 void setup() {
   // pinModes 
@@ -48,7 +56,8 @@ void setup() {
   //Serial monitor
   Serial.begin(9600);
   GPS_Serial.begin(9600);
-  WiFi_Serial.begin(19200);
+  Serial.println("Starting...");
+  WiFi_Serial.begin(9600);
   //3-Axis
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.print("init");
@@ -144,13 +153,102 @@ void readFrom(byte address, int num, byte _buff[]) {
 //GPS
 void ReadGPS()
 {
-  GPS_Serial.listen(); // make the GPS port the active listening one so that it will 
-while (GPS_Serial.available() > 0)
+    GPS_Serial.listen();
+
+    while (GPS_Serial.available())
     {
-    Serial.write(GPS_Serial.read()); // Output the raw GPS data to the serial monitor
+        char c = GPS_Serial.read();
+
+        gps.encode(c);
+
+        if (gps.location.isUpdated())
+        {
+            Serial.print("Latitude: ");
+            Serial.println(gps.location.lat(), 6);
+
+            Serial.print("Longitude: ");
+            Serial.println(gps.location.lng(), 6);
+        }
     }
+}
+
+//Wifi module. 
+void Wifi()
+{
+    WiFi_Serial.listen();
+
+    // Reset ESP8266
+    sendData("AT+RST\r\n", 3000, DEBUG);
+
+    // Set WiFi mode
+    sendData("AT+CWMODE=1\r\n", 2000, DEBUG);
+
+    // Connect to WiFi
+    sendData("AT+CWJAP=\"Flippty floppity fosh\",\"patrickthestarfish\"\r\n", 10000, DEBUG);
+
+    // Single connection mode
+    sendData("AT+CIPMUX=0\r\n", 2000, DEBUG);
+
+    // Connect to ThingSpeak
+    sendData("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",80\r\n", 5000, DEBUG);
+
+    // Create HTTP GET request
+   String getStr = "GET /update?api_key=";
+  getStr += apiKey;
+  getStr += "&field1=";
+  getStr += String(latitude, 6);
+  getStr += "&field2=";
+  getStr += String(longitude, 6);
+  getStr += "\r\n\r\n";
+
+    // Tell ESP how many bytes will be sent
+    WiFi_Serial.print("AT+CIPSEND=");
+    WiFi_Serial.println(getStr.length());
+
+    delay(1000);
+
+    if (WiFi_Serial.find(">"))
+    {
+        sendData(getStr, 5000, DEBUG);
+    }
+    else
+    {
+        Serial.println("CIPSEND Failed");
+    }
+
+    // Close TCP connection
+    sendData("AT+CIPCLOSE\r\n", 2000, DEBUG);
+}
+
+String sendData(String command, const int timeout, boolean debug)
+{
+    String response = "";
+
+    WiFi_Serial.print(command);
+
+    long startTime = millis();
+
+    while ((millis() - startTime) < timeout)
+    {
+        while (WiFi_Serial.available())
+        {
+            char c = WiFi_Serial.read();
+            response += c;
+        }
+    }
+
+    if (debug)
+    {
+        Serial.println(response);
+    }
+
+    return response;
 }
 //to look at files and check for sample code for the various sensors. Under the file name Arudiuno sample code for IO devices
 
 //to take a look at thinkspeak code as well 
 //to do sd,wifi app and thinkspeak
+
+
+
+
