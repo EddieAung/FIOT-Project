@@ -34,8 +34,8 @@ TinyGPSPlus gps;
 // ==========================================================
 
 // --- WiFi network ---
-#define WIFI_SSID   "Ed"
-#define WIFI_PASS   "12345678"
+#define WIFI_SSID   "Flippty floppity fosh"
+#define WIFI_PASS   "patrickthestarfish"
 
 // --- ThingSpeak ---
 #define TS_API_KEY    "AXC34E1LMIQAR55C"    // WRITE API Key
@@ -550,7 +550,7 @@ void ReadGPS() {
 
   // Status message, throttled - NO delay() here, it would overflow
   // the SoftwareSerial buffer and destroy every NMEA sentence.
-  if (millis() - lastGpsMsg > GPS_MSG_INTERVAL) {
+  if (millis() - lastGpsMsg > GPS_MSG_INTERVAL) {  
     lastGpsMsg = millis();
     if (gps.location.isValid()) {
       Serial.println(F("GPS FIX!"));
