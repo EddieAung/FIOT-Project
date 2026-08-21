@@ -428,7 +428,7 @@ void announceMode(int m) {
     case MODE_OFF:  Serial.println(F("00 - OFF"));                    break;
     case MODE_GPS:  Serial.println(F("01 - GPS SENSOR"));             break;
     case MODE_MOVE: Serial.println(F("10 - MOVE AWAY DETECTION"));    break;
-    case MODE_WIFI: Serial.println(F("11 - WIFI LOCATION (to be done)")); break;
+    //case MODE_WIFI: Serial.println(F("11 - WIFI LOCATION (to be done)")); break;
   }
 }
 
